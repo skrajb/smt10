@@ -13,7 +13,7 @@
 <style>
 html, body { height: 100%; margin: 0; }
 body { font-family: var(--font-body); background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
-.te-wrap { width: 92%; max-width: 1000px; margin: 24px auto 40px; }
+.te-wrap { width: 92%; max-width: 1100px; margin: 24px auto 40px; }
 .te-intro, .te-box {
   background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--gold);
   border-radius: 16px; box-shadow: var(--shadow-md); padding: 22px; margin-bottom: 18px;
@@ -31,24 +31,58 @@ body { font-family: var(--font-body); background: var(--bg); display: flex; flex
 .te-lang:first-of-type { margin-top: 4px; }
 .te-lang-name { font-weight: 800; font-size: 15px; color: var(--ink); }
 .te-onlylang { margin: 0 0 12px; color: var(--muted); font-size: 13.5px; }
-.te-ex { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.te-ex { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+/* Exercise card: document icon, "Exercise N" + language, round play button on the right */
 .te-ex .exercise-btn {
-  background: var(--ink); color: #fff; border: none; border-radius: 12px; padding: 14px 16px; text-align: left;
-  font-weight: 700; font-size: .95rem; cursor: pointer; transition: transform .12s ease;
+  --xc: var(--accent, var(--ink));
+  margin: 0; font-size: inherit;
+  display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; text-align: left; font-family: inherit;
+  background: var(--card); color: var(--ink); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 12px;
+  box-shadow: var(--shadow-sm); cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease, color .15s ease;
 }
-.te-ex .exercise-btn:hover { transform: translateY(-2px); }
-.te-ex .exercise-btn small { display: block; font-weight: 500; opacity: .8; margin-top: 3px; font-size: .75rem; }
+.te-ex .exercise-btn .xi { flex: none; width: 30px; height: 30px; color: var(--xc); }
+.te-ex .exercise-btn .xt { flex: 1; min-width: 0; display: block; }
+.te-ex .exercise-btn .xt b { display: block; font-size: .98rem; font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.te-ex .exercise-btn .xt small { display: block; margin-top: 2px; font-size: .78rem; font-weight: 500; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.te-ex .exercise-btn .xp { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--xc); color: var(--xc); transition: background .15s ease, color .15s ease; }
+.te-ex .exercise-btn .xp svg { width: 14px; height: 14px; margin-left: 2px; }
+.te-ex .exercise-btn:hover:not(.te-off), .te-ex .exercise-btn:focus-visible:not(.te-off) {
+  transform: translateY(-2px); border-color: var(--xc); box-shadow: 0 10px 22px rgba(0,0,0,.12); outline: none;
+}
+/* first exercise is the highlighted "start here" card, like the mock-up; any card fills the same way on hover */
+.te-ex .exercise-btn.te-first, .te-ex .exercise-btn:hover:not(.te-off), .te-ex .exercise-btn:focus-visible:not(.te-off) {
+  background: linear-gradient(135deg, var(--ink), var(--ink-700, var(--ink))); border-color: var(--ink); color: #fff;
+}
+.te-ex .exercise-btn.te-first .xi, .te-ex .exercise-btn:hover:not(.te-off) .xi, .te-ex .exercise-btn:focus-visible:not(.te-off) .xi { color: #fff; }
+.te-ex .exercise-btn.te-first .xt small, .te-ex .exercise-btn:hover:not(.te-off) .xt small, .te-ex .exercise-btn:focus-visible:not(.te-off) .xt small { color: rgba(255,255,255,.82); }
+.te-ex .exercise-btn.te-first .xp, .te-ex .exercise-btn:hover:not(.te-off) .xp, .te-ex .exercise-btn:focus-visible:not(.te-off) .xp { background: #fff; border-color: #fff; color: var(--ink); }
+/* heading card: icon + test name + "Choose an exercise" */
+.te-head { display: flex; align-items: center; gap: 16px; margin: 0 0 18px; }
+.te-head-ico { flex: none; width: 54px; height: 54px; color: var(--ink); }
+.te-head-ico svg { width: 100%; height: 100%; }
+.te-head .te-title { margin: 0; line-height: 1.15; }
+.te-head .te-sub { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+.te-head .te-desc { margin: 6px 0 0; }
 /* Languages of a multi-language test (e.g. English + Punjabi) sit side by side */
 .te-wrap.te-wide { max-width: 1200px; }
 .te-cols { display: grid; gap: 18px; align-items: start; }
 .te-col { min-width: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px 14px; }
 .te-col .te-lang { margin: 0 0 12px; background: var(--card); }
-.te-col .te-ex { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.te-col .te-ex { grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; }
+.te-col .te-ex .exercise-btn { padding: 12px 40px 12px 11px; gap: 9px; }
+.te-col .te-ex .exercise-btn .xi { width: 26px; height: 26px; }
+.te-col .te-ex .exercise-btn .xp { width: 28px; height: 28px; }
 @media (max-width: 720px) { .te-cols { grid-template-columns: 1fr !important; } }
-.te-cell { display: flex; flex-direction: column; gap: 5px; }
-.te-cell .exercise-btn { width: 100%; }
-.te-print { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--ink); text-decoration: none; border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; background: var(--card); }
-.te-print:hover { background: var(--bg); }
+/* the Print button lives inside the right end of each card, so the card keeps its full width */
+.te-cell { position: relative; min-width: 0; }
+.te-cell .exercise-btn { width: 100%; padding-right: 44px; }
+.te-print { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center;
+  color: var(--muted); text-decoration: none; border-radius: 50%; transition: background .15s ease, color .15s ease; }
+.te-print svg { width: 17px; height: 17px; }
+.te-print:hover, .te-print:focus-visible { background: rgba(120,130,150,.22); color: var(--ink); outline: none; }
+.te-cell:hover .te-print, .te-cell:has(.te-first) .te-print { color: #fff; }
+.te-cell:hover .te-print:hover { background: rgba(255,255,255,.22); }
+.te-col .te-print { right: 5px; }
 .te-locked { background: #fff3cd; color: #664d03; border-radius: 10px; padding: 8px 12px; font-size: 13px; margin: 0 0 10px; }
 .te-locked a { color: inherit; font-weight: 700; }
 .te-ex .exercise-btn.te-off { opacity: .45; cursor: not-allowed; transform: none; }
@@ -119,6 +153,15 @@ document.addEventListener('keydown', e => {
     s: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="15" cy="17" r="11"/><circle cx="15" cy="17" r="6.4"/><circle cx="15" cy="17" r="1.8" fill="currentColor"/><path d="M15 17 26 6M21 5.5h5.5V11"/></svg>',
     m: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h11l6 6v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M19 3v6h6"/><path d="M11 18l3.2 3.2L21 14.5"/><path d="M11 25.5h8"/></svg>'
   };
+  // Heading icons (scales for courts, cap for universities, document otherwise) and the exercise-card icons
+  var HEAD_ICONS = {
+    scales: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 6v34M14 40h20M10 12h28"/><path d="M10 12 3.5 26a7 7 0 0 0 13 0L10 12ZM38 12l-6.5 14a7 7 0 0 0 13 0L38 12Z"/></svg>',
+    cap: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m24 9 21 10-21 10L3 19 24 9Z"/><path d="M11 25v9c3 4 8 6 13 6s10-2 13-6v-9M45 19v12"/></svg>',
+    doc: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5h17l9 9v27a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M29 5v9h9M16 24h16M16 31h16M16 38h9"/></svg>'
+  };
+  var EX_ICON = '<svg class="xi" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="22" height="24" rx="4"/><path d="M10.5 11h11M10.5 16h11M10.5 21h6"/></svg>';
+  var PRINT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>';
+  var EX_PLAY = '<span class="xp"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 1.8v12.4a.8.8 0 0 0 1.2.7l10-6.2a.8.8 0 0 0 0-1.4L4.2 1.1A.8.8 0 0 0 3 1.8Z"/></svg></span>';
   function practiceHtml(showLangs) {
     var rows = showLangs.filter(function (L) { return PRAC[L]; });
     if (!rows.length) rows = ["English"];
@@ -159,7 +202,14 @@ document.addEventListener('keydown', e => {
     var html = practiceHtml(shown) +
       '<div class="te-box" id="body"></div>';
     // one card: the test heading (and its short description, if any) sit above the exercises
-    var head = '<h2 class="te-title">' + esc(t.name) + "</h2>" + (t.desc ? '<p class="te-desc">' + esc(t.desc) + "</p>" : "");
+    var hk = String(t.icon || "").toLowerCase();
+    if (!HEAD_ICONS[hk]) {
+      var hs = (t.id + " " + t.name).toLowerCase();
+      hk = /court|phhc|judic|\blaw\b/.test(hs) ? "scales" : /\buni\b|univers|college|school|educat|agri|academ/.test(hs) ? "cap" : "doc";
+    }
+    var head = '<div class="te-head"><span class="te-head-ico">' + HEAD_ICONS[hk] + '</span><div>' +
+      '<h2 class="te-title">' + esc(t.name) + '</h2><p class="te-sub">Choose an exercise</p>' +
+      (t.desc ? '<p class="te-desc">' + esc(t.desc) + "</p>" : "") + '</div></div>';
     root.innerHTML = html;
     var body = document.getElementById("body");
 
@@ -183,7 +233,7 @@ document.addEventListener('keydown', e => {
       return;
     }
 
-    body.innerHTML = head + "<h3>Choose an exercise</h3>";
+    body.innerHTML = head;
     if (!exs.length) {
       body.insertAdjacentHTML("beforeend", '<p class="te-empty">' + (loading ? "Loading exercises\u2026" : "No exercises have been added to this test yet.") + "</p>");
     } else {
@@ -232,8 +282,9 @@ document.addEventListener('keydown', e => {
         list.forEach(function (ex, i) {
           var b = document.createElement("button");
           b.type = "button"; b.className = "exercise-btn";
-          b.innerHTML = (multi ? esc(L) + " " : "") + "Exercise " + (i + 1) + (ex.title ? "<small>" + esc(ex.title) + "</small>" : "");
-          if (!langOk) { b.disabled = true; b.classList.add("te-off"); b.insertAdjacentHTML("afterbegin", "&#128274; "); }
+          b.innerHTML = EX_ICON + '<span class="xt"><b>Exercise ' + (i + 1) + "</b></span>";
+          if (i === 0 && langOk) b.classList.add("te-first");
+          if (!langOk) { b.disabled = true; b.classList.add("te-off"); b.querySelector(".xt b").insertAdjacentHTML("afterbegin", "&#128274; "); }
           b.addEventListener("click", function () {
             // last-moment check with the sheet: a blocked / expired code is caught before the test opens
             T.revalidate(t, { force: true }).then(function () {
@@ -246,7 +297,8 @@ document.addEventListener('keydown', e => {
           if (langOk) {   // print the exercise sheet BEFORE the test (same sheet as Manage & Print)
             var pa = document.createElement("a");
             pa.className = "te-print";
-            pa.innerHTML = "&#128424; Print";
+            pa.innerHTML = PRINT_ICON;
+            pa.title = "Print this exercise"; pa.setAttribute("aria-label", "Print exercise " + (i + 1));
             pa.href = "printexercise.html?test=" + encodeURIComponent(t.id) + (multi ? "&lang=" + encodeURIComponent(L) : "") +
               "&ex=" + (i + 1) + "&back=" + encodeURIComponent("testexercises.html?id=" + t.id);
             cell.appendChild(pa);
