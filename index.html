@@ -200,6 +200,18 @@
       <div class="pt-price-wrap"><table class="pt-price" id="ptPriceTable"></table></div>
       <div class="pt-offer" id="ptOffer" hidden></div>
       <div class="pt-set"><h3>How to buy or renew</h3><ol class="pt-how" id="ptHow"></ol></div>
+      <div class="pt-set pt-formbox" id="ptFormBox">
+        <h3>Fill your details</h3>
+        <ol class="pt-how">
+          <li>Open the details form below and fill in all your details.</li>
+          <li>After submitting, take a <b>screenshot</b> of the filled form.</li>
+          <li>Send the screenshot on WhatsApp to <b id="ptWaNum"></b>.</li>
+        </ol>
+        <div class="pt-buy-actions">
+          <a class="pt-btn" id="ptFormBtn" href="#" target="_blank" rel="noopener" hidden>Open details form</a>
+          <a class="pt-btn pt-wa" id="ptWaBtn" href="#" target="_blank" rel="noopener">Send screenshot on WhatsApp</a>
+        </div>
+      </div>
       <div class="pt-buy-actions">
         <a class="pt-btn" href="activate.html">I have a code - Activate</a>
         <a class="pt-btn ghost" href="contact.html">Contact to buy</a>
@@ -403,6 +415,15 @@
       of.hidden = !P.offer; of.textContent = P.offer || "";
       var D = window.SMARTECH_PRICING || {};
       document.getElementById("ptHow").innerHTML = ((P.how && P.how.length ? P.how : D.how) || []).map(function (h) { return "<li>" + esc(h) + "</li>"; }).join("");
+      // details form: Google Form link + WhatsApp number for the screenshot (GitHub file first, built-in pricing.js as fallback)
+      var F = P.form || {}, DF = D.form || {};
+      var formLink = String(F.link || DF.link || "").trim();
+      if (!/^https?:\/\//i.test(formLink)) formLink = "";
+      var wa = String(F.whatsapp || DF.whatsapp || "919530994404").replace(/[^0-9]/g, "");
+      var fb = document.getElementById("ptFormBtn");
+      fb.hidden = !formLink; fb.href = formLink || "#";
+      document.getElementById("ptWaBtn").href = "https://wa.me/" + wa + "?text=" + encodeURIComponent("Hello, I have filled the details form. Please find my screenshot attached.");
+      document.getElementById("ptWaNum").textContent = "+" + wa.replace(/^(\d{2})(\d{5})(\d{5})$/, "$1 $2 $3");
       var c = (P.contact && (P.contact.text || P.contact.email || P.contact.phone)) ? P.contact : (D.contact || {});
       document.getElementById("ptBuyContact").innerHTML = [c.text, c.phone, c.email].filter(Boolean).map(esc).join(" &middot; ");
     }

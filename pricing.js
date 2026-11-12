@@ -9,6 +9,7 @@
    renew     : renewal price
    validity  : how long one purchase / renewal lasts
    note      : optional small line under the course name
+   form.link : your Google Form link (students fill their details there, then WhatsApp a screenshot)
 
    THE AMOUNTS BELOW ARE SAMPLE VALUES - replace them with your real prices.
    ============================================================ */
@@ -26,5 +27,9 @@ window.SMARTECH_PRICING = {
     "You receive an activation code.",
     "Open Activation (Dashboard bottom links) and enter the code. For a renewal, enter the new code the same way."
   ],
-  contact: { text: "Smartech Education Computer Institute", email: "smartecheducation@gmail.com", phone: "" }
+  contact: { text: "Smartech Education Computer Institute", email: "smartecheducation@gmail.com", phone: "" },
+  // Details form: the student fills the Google Form, takes a screenshot and sends it on WhatsApp.
+  //   link     : PASTE YOUR GOOGLE FORM LINK HERE (https://forms.gle/...). Leave "" to hide the form button.
+  //   whatsapp : number with country code, digits only
+  form: { link: "", whatsapp: "919530994404" }
 };

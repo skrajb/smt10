@@ -236,6 +236,7 @@
   }
 
   /* pricing.txt: settings above the first ###, then one "### Course name" block per course.
+       form: https://forms.gle/...   form-whatsapp: 919530994404   (details form + WhatsApp screenshot)
        currency: Rs.            offer: text            email: a@b.com     phone: 98xxxxxxxx
        contact: institute name  step: one line (repeat "step:" for each step of "how to buy")
        ### English Typing Course
@@ -250,13 +251,15 @@
   }
   function parsePricing(raw) {
     var text = norm(raw), cut = text.search(/^###/m), head = cut < 0 ? text : text.slice(0, cut);
-    var out = { currency: "", offer: "", how: [], contact: { text: "", email: "", phone: "" }, courses: [] };
+    var out = { currency: "", offer: "", how: [], contact: { text: "", email: "", phone: "" }, form: { link: "", whatsapp: "" }, courses: [] };
     kvLines(head).forEach(function (p) {
       var k = p[0], v = p[1];
       if (k === "currency") out.currency = v;
       else if (k === "offer") out.offer = v;
       else if (k === "step" || k === "how") { if (v) out.how.push(v); }
       else if (k === "contact" || k === "institute") out.contact.text = v;
+      else if (k === "form" || k === "form-link" || k === "google-form") out.form.link = v;
+      else if (k === "form-whatsapp" || k === "whatsapp-number") out.form.whatsapp = v.replace(/[^0-9]/g, "");
       else if (k === "email") out.contact.email = v;
       else if (k === "phone" || k === "mobile" || k === "whatsapp") out.contact.phone = v;
     });
