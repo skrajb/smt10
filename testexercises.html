@@ -112,6 +112,17 @@ body { font-family: var(--font-body); background: var(--bg); display: flex; flex
 .te-pc.k { --pc: #3b4ec4; --pc-soft: #eef0ff; --pc-mid: #c7cdf7; }
 .te-pc.s { --pc: #c47a0a; --pc-soft: #fff5e0; --pc-mid: #f5d9a0; }
 .te-pc.m { --pc: #6d3fc4; --pc-soft: #f3edff; --pc-mid: #d9c9f7; }
+/* highlighted practice cards: solid colour, white text, bigger icon chip */
+.te-pc { color: #fff; border: none; padding: 18px 20px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--pc), var(--pc-dk)); box-shadow: 0 8px 20px var(--pc-mid); }
+.te-pc::after { content: ""; position: absolute; right: -26px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.12); pointer-events: none; }
+.te-pc svg { width: 46px; height: 46px; padding: 10px; border-radius: 14px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,.18); }
+.te-pc b { font-size: 16.5px; color: #fff; }
+.te-pc small { color: rgba(255,255,255,.88); font-size: 13px; }
+.te-pc:hover, .te-pc:focus-visible { transform: translateY(-4px); box-shadow: 0 14px 28px var(--pc-mid); }
+.te-pc.k { --pc: #3b4ec4; --pc-dk: #2a37a0; --pc-mid: rgba(59,78,196,.38); }
+.te-pc.s { --pc: #e0900f; --pc-dk: #b86a00; --pc-mid: rgba(224,144,15,.42); }
+.te-pc.m { --pc: #7a48d6; --pc-dk: #5a2fa8; --pc-mid: rgba(122,72,214,.38); }
 @media (max-width: 720px) { .te-prac-grid { grid-template-columns: 1fr; } }
 </style>
 <script>
