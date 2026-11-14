@@ -21,28 +21,78 @@ body { font-family: var(--font-body); background: var(--bg); display: flex; flex
 }
 .demo-lead strong { color: var(--ink); }
 
-.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+/* Two cards: Chunk Based Demo, then Words Based Demo (side by side, stacked on a narrow window) */
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; align-items: stretch; }
 .demo-card {
+  display: flex; flex-direction: column;
   background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--gold);
-  border-radius: 16px; box-shadow: var(--shadow-md); padding: 22px 20px 20px; text-align: center;
+  border-radius: 16px; box-shadow: var(--shadow-md); padding: 22px 22px 20px;
 }
+.demo-card.demo-words { border-top-color: var(--accent); }
+.demo-words .demo-icon { background: var(--accent); }
+
+.demo-head { display: flex; align-items: center; gap: 14px; }
+.demo-icon {
+  flex: 0 0 auto; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+  background: var(--ink); color: #fff;
+}
+.demo-icon svg { width: 26px; height: 26px; display: block; }
+.demo-titles { min-width: 0; flex: 1 1 auto; }
+.demo-card h2 { margin: 0; border: none; padding: 0; color: var(--ink); font-size: 1.3rem; line-height: 1.2; }
+.demo-kicker { margin: 3px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.demo-time {
+  flex: 0 0 auto; padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 800; letter-spacing: .04em;
+  color: var(--ink); background: var(--gold-soft); border: 1px solid var(--gold);
+}
+.demo-words .demo-time { background: transparent; border-color: var(--accent); color: var(--accent); }
+
+.demo-desc { margin: 14px 0 10px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.demo-desc strong { color: var(--ink); }
+.demo-facts { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
+.demo-facts li { position: relative; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text); }
+.demo-facts li::before {
+  content: ""; position: absolute; left: 2px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+}
+.demo-words .demo-facts li::before { background: var(--accent); }
+.demo-facts kbd {
+  font: 600 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--border); border-bottom-width: 2px;
+  border-radius: 5px; background: var(--bg); color: var(--ink);
+}
+
+/* One row per language: badge + name on the left, Start Demo button(s) on the right */
+.demo-langs { margin-top: auto; border-top: 1px solid var(--border); padding-top: 6px; }
+.demo-lang { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.demo-lang:last-child { border-bottom: none; padding-bottom: 0; }
 .demo-badge {
-  width: 52px; height: 52px; margin: 0 auto 10px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--ink); color: #fff; font-size: 1.5rem; font-weight: 800;
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gold-soft); color: var(--ink); border: 1px solid var(--gold); font-size: 1.15rem; font-weight: 800;
   font-family: "Nirmala UI", "Noto Sans Gurmukhi", "Noto Sans Devanagari", Arial, sans-serif;
 }
-.demo-card h2 { margin: 0 0 4px; border: none; padding: 0; color: var(--ink); font-size: 1.25rem; }
-.demo-card .demo-time { margin: 0 0 16px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.demo-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.demo-list p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.demo-words .demo-badge { background: #fff; border-color: var(--accent); color: var(--accent); }
+.demo-lname { flex: 1 1 auto; min-width: 0; line-height: 1.25; }
+.demo-lname strong { display: block; color: var(--ink); font-size: 1rem; }
+.demo-lname span { font-size: 12.5px; color: var(--muted); font-family: "Nirmala UI", "Noto Sans Gurmukhi", "Noto Sans Devanagari", Arial, sans-serif; }
+.demo-list { flex: 0 1 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.demo-list p { margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
 
 .exercise-btn {
-  background: var(--ink); color: #fff; border: none; border-radius: 10px; padding: 12px 22px; min-width: 150px;
-  font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: transform .12s ease, background .12s ease;
+  background: var(--ink); color: #fff; border: none; border-radius: 10px; padding: 10px 20px; min-width: 118px;
+  font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: transform .12s ease, background .12s ease;
 }
 .exercise-btn:hover { background: var(--ink-700, var(--ink)); transform: translateY(-2px); }
+.exercise-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.demo-words .exercise-btn { background: var(--accent); }
+.demo-words .exercise-btn:hover { background: var(--accent-dark, var(--accent)); }
 
 .demo-note { margin: 18px 2px 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+@media (max-width: 460px) {
+  .demo-card { padding: 18px 16px 16px; }
+  .demo-time { display: none; }
+  .demo-lang { flex-wrap: wrap; }
+  .demo-list { width: 100%; justify-content: stretch; }
+  .demo-list .exercise-btn { flex: 1 1 auto; }
+}
 </style>
 
 <!-- SECURITY BLOCK -->
@@ -68,32 +118,95 @@ document.addEventListener('keydown', e => {
 <div class="demo-wrap">
 
   <p class="demo-lead">
-    <strong>How it works:</strong> choose your language and open the demo exercise. You get a full
+    <strong>How it works:</strong> pick a demo type, then your language. You get a full
     <strong>5-minute</strong> typing test. The timer starts with your first key, and your speed and accuracy
     appear automatically when time is up.
   </p>
 
   <div class="demo-grid">
-    <section class="demo-card">
-      <div class="demo-badge" aria-hidden="true">A</div>
-      <h2>English</h2>
-      <p class="demo-time">5 minutes</p>
-      <div class="demo-list" id="demoEnglish"></div>
+
+    <!-- Card 1: Chunk Based Demo (testpage.html) -->
+    <section class="demo-card demo-chunk" aria-labelledby="chunkTitle">
+      <header class="demo-head">
+        <div class="demo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="5" rx="1.5"/><rect x="3" y="10" width="18" height="5" rx="1.5"/><rect x="3" y="17" width="11" height="4" rx="1.5"/></svg>
+        </div>
+        <div class="demo-titles">
+          <h2 id="chunkTitle">Chunk Based Demo</h2>
+          <p class="demo-kicker">Typing Practice &middot; 10 chunks</p>
+        </div>
+        <span class="demo-time">5 min</span>
+      </header>
+
+      <p class="demo-desc">
+        The passage is split into <strong>10 short chunks</strong>. Type one chunk, then move on to the next
+        &mdash; the same way as the Typing Practice (Chunk) tests.
+      </p>
+      <ul class="demo-facts">
+        <li><kbd>Enter</kbd> or <kbd>&darr;</kbd> next chunk &middot; <kbd>&uarr;</kbd> previous chunk</li>
+        <li>Speed is counted on characters: <strong>5 characters = 1 word</strong></li>
+      </ul>
+
+      <div class="demo-langs" role="group" aria-label="Chunk Based Demo - choose a language">
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">A</span>
+          <div class="demo-lname"><strong>English</strong></div>
+          <div class="demo-list" id="chunkEnglish"></div>
+        </div>
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">&#x0A2A;</span>
+          <div class="demo-lname"><strong>Punjabi</strong><span>&#x0A2A;&#x0A70;&#x0A1C;&#x0A3E;&#x0A2C;&#x0A40;</span></div>
+          <div class="demo-list" id="chunkPunjabi"></div>
+        </div>
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">&#x0905;</span>
+          <div class="demo-lname"><strong>Hindi</strong><span>&#x0939;&#x093F;&#x0928;&#x094D;&#x0926;&#x0940;</span></div>
+          <div class="demo-list" id="chunkHindi"></div>
+        </div>
+      </div>
     </section>
 
-    <section class="demo-card">
-      <div class="demo-badge" aria-hidden="true">&#x0A2A;</div>
-      <h2>Punjabi</h2>
-      <p class="demo-time">5 minutes</p>
-      <div class="demo-list" id="demoPunjabi"></div>
+    <!-- Card 2: Words Based Demo - Long Paragraph (paragraph.html, word engine) -->
+    <section class="demo-card demo-words" aria-labelledby="wordsTitle">
+      <header class="demo-head">
+        <div class="demo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 11h16"/><path d="M4 16h16"/><path d="M4 21h9"/></svg>
+        </div>
+        <div class="demo-titles">
+          <h2 id="wordsTitle">Words Based Demo</h2>
+          <p class="demo-kicker">Long Paragraph &middot; word count</p>
+        </div>
+        <span class="demo-time">5 min</span>
+      </header>
+
+      <p class="demo-desc">
+        The <strong>whole passage</strong> is on screen and you type it in one go, like the Long Paragraph
+        tests. The result is calculated on the <strong>words you typed</strong>.
+      </p>
+      <ul class="demo-facts">
+        <li>Net words = typed words &minus; mistakes (wrong, extra, skipped words)</li>
+        <li>Result speed = net words &divide; minutes (PHHC / PAU style)</li>
+      </ul>
+
+      <div class="demo-langs" role="group" aria-label="Words Based Demo - choose a language">
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">A</span>
+          <div class="demo-lname"><strong>English</strong></div>
+          <div class="demo-list" id="wordsEnglish"></div>
+        </div>
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">&#x0A2A;</span>
+          <div class="demo-lname"><strong>Punjabi</strong><span>&#x0A2A;&#x0A70;&#x0A1C;&#x0A3E;&#x0A2C;&#x0A40;</span></div>
+          <div class="demo-list" id="wordsPunjabi"></div>
+        </div>
+        <div class="demo-lang">
+          <span class="demo-badge" aria-hidden="true">&#x0905;</span>
+          <div class="demo-lname"><strong>Hindi</strong><span>&#x0939;&#x093F;&#x0928;&#x094D;&#x0926;&#x0940;</span></div>
+          <div class="demo-list" id="wordsHindi"></div>
+        </div>
+      </div>
     </section>
 
-    <section class="demo-card">
-      <div class="demo-badge" aria-hidden="true">&#x0905;</div>
-      <h2>Hindi</h2>
-      <p class="demo-time">5 minutes</p>
-      <div class="demo-list" id="demoHindi"></div>
-    </section>
   </div>
 
   <p class="demo-note">
@@ -106,10 +219,16 @@ document.addEventListener('keydown', e => {
 <script>
 /* Demo exercises come from the same GitHub exercise file as everything else.
    In that file a demo is a block whose ### header contains the word "Demo":
-       ### Demo English   /   ### Demo Punjabi   /   ### Demo Hindi            */
+       ### Demo English   /   ### Demo Punjabi   /   ### Demo Hindi
+   A plain "### Demo <language>" serves BOTH cards. To give one card its own text:
+       ### Demo Chunk English     -> Chunk Based Demo only
+       ### Demo Words English     -> Words Based Demo only  (Paragraph / Long also work)  */
 if (window.SmartechExercises) {
-  [["English", "demoEnglish"], ["Punjabi", "demoPunjabi"], ["Hindi", "demoHindi"]].forEach(function (p) {
-    SmartechExercises.mountDemo({ container: p[1], lang: p[0], target: "paragraph.html" });
+  ["English", "Punjabi", "Hindi"].forEach(function (lang) {
+    // Card 1: Chunk Based Demo -> testpage.html
+    SmartechExercises.mountDemo({ container: "chunk" + lang, lang: lang, kind: "chunk", label: "Start Demo" });
+    // Card 2: Words Based Demo (Long Paragraph, word engine) -> paragraph.html
+    SmartechExercises.mountDemo({ container: "words" + lang, lang: lang, kind: "words", label: "Start Demo" });
   });
 }
 </script>

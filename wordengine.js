@@ -215,8 +215,10 @@
   /* ---------- 2) results page glue (browser only) ---------- */
   function pad2(n) { return n < 10 ? "0" + n : String(n); }
 
-  // ctx: { test, pairs, totalSeconds, startTime, backspaces, exerciseLabel, saveStats }
+  // ctx: { test, pairs, totalSeconds, startTime, backspaces, exerciseLabel, saveStats, demo }
   //   test          the active test snapshot (SmartechTests.activeCriteria())
+  //   demo          true for the 5-minute "Words Based Demo": the same word counting, but no
+  //                 pass mark (result = "Demo"), no certificate and nothing sent to the leaderboard
   //   pairs         [{ ref, typed }] one per chunk the candidate typed
   //   totalSeconds  the test time (window.state.totalTime)
   //   startTime     performance.now() of the first key
@@ -231,8 +233,9 @@
     var T = root.SmartechTests;
     var minutes = (Number(ctx.totalSeconds) || (test.minutes * 60)) / 60;
     var res = score(ctx.pairs, { minutes: minutes, spaceMistakes: !!test.spaceMistakes, caseSensitive: !!test.caseSensitive });
-    var ev = T.evaluateWords(test, res);
-    var result = ev.passed ? "Pass" : "Fail";
+    var demo = !!ctx.demo;
+    var ev = demo ? null : T.evaluateWords(test, res);
+    var result = demo ? "Demo" : (ev.passed ? "Pass" : "Fail");
 
     // --- the comparison tables (Original | Typed) ---
     var several = (root.paragraphs && root.paragraphs.length > 1);
@@ -274,8 +277,8 @@
     var mm = Math.floor(elapsed / 60), ss = Math.floor(elapsed % 60);
 
     // --- numbers ---
-    var need = T.requiredWords(test);
-    var wpmNeed = T.requiredWpm(test);
+    var need = demo ? 0 : T.requiredWords(test);
+    var wpmNeed = demo ? 0 : T.requiredWpm(test);
     var mins = String(round(minutes, 2));
     var spaceBits = res.spacingPresses
       ? " + " + res.spacingPresses + " extra spacebar press" + (res.spacingPresses === 1 ? "" : "es") + (res.spaceMistakes ? " (counted)" : " (not counted)")
@@ -290,17 +293,25 @@
     set("w-mistakes-value", String(res.mistakes));
     set("w-net-value", res.netWords + " words  (" + res.typedWords + " − " + res.mistakes + ")");
     set("w-speed-value", res.speed + " WPM  (" + res.netWords + " ÷ " + mins + " min)");
-    set("w-required-value", need + " " + (test.basis === "gross" ? "typed" : "net") + " words in " + mins + " min  (" + wpmNeed + " WPM)");
+    set("w-required-value", demo
+      ? "No pass mark (" + mins + " min demo)"
+      : need + " " + (test.basis === "gross" ? "typed" : "net") + " words in " + mins + " min  (" + wpmNeed + " WPM)");
     set("time-spent-value", mm + " min " + pad2(ss) + " sec");
     set("accuracy-percentage-value", res.accuracy + "%");
     set("backspace-count-value", String(ctx.backspaces || 0));
     var rv = $("w-result-value");
-    if (rv) { rv.textContent = result; rv.className = result === "Pass" ? "pass-result" : "fail-result"; }
+    if (rv) { rv.textContent = result; rv.className = demo ? "demo-result" : (result === "Pass" ? "pass-result" : "fail-result"); }
 
     var en = $("exam-note");
-    if (en) { en.style.display = "block"; en.innerHTML = '<span class="red-asterisk">*</span>Once time is over the test cannot be resumed and the text typed cannot be edited afterwards.'; }
+    if (en) { en.style.display = "block"; en.innerHTML = '<span class="red-asterisk">*</span>' + (demo ? "Demo test: once" : "Once") + ' time is over the test cannot be resumed and the text typed cannot be edited afterwards.'; }
     var pn = $("pass-note");
-    if (pn) { pn.style.display = "block"; pn.innerHTML = T.noteHTML(test); }
+    if (pn) {
+      pn.style.display = "block";
+      pn.innerHTML = demo
+        ? '<span class="red-asterisk">*</span>This was a ' + mins + '-minute words based demo test. Result speed = (typed words &minus; mistakes) &divide; minutes. ' +
+          'It is not a pass / fail exam result, no certificate is issued and it is not sent to the leaderboard.'
+        : T.noteHTML(test);
+    }
 
     // --- save: history, certificate (on Pass) and the results sheet ---
     var store = root.localStorage;
@@ -323,8 +334,9 @@
       actualSpeed: res.speed,
       timeSpent: mm + "m " + ss + "s",
       result: result,
-      testId: test.id,
-      testName: test.name,
+      testId: demo ? "" : test.id,
+      testName: demo ? "" : test.name,
+      isDemo: demo,
       timestamp: new Date().toISOString(),
       language: ls("selectedExerciseLanguage") || "English",
       exerciseNo: Number(ls("selectedExerciseNo")) || null,

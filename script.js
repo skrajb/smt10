@@ -131,10 +131,18 @@ let words = [];
 let chunkSize = 0;
 /* Test types (tests.js): when a test from the Test Centre is active, its minutes
    and pass rule replace the built-in 10-minute PSSSB defaults below. */
+/* 5-minute Chunk Based Demo (opened from demo.html): a fixed 5-minute test on the normal
+   chunk engine. No test-type rules, no Pass / Fail, no certificate and nothing is sent to the
+   leaderboard (the saved result carries isDemo: true). */
+function smartechIsDemo() {
+    try { return localStorage.getItem("selectedExerciseMode") === "demo"; } catch (e) { return false; }
+}
 function smartechActiveTest() {
+    if (smartechIsDemo()) return null;       // a demo never uses a Test Centre rule
     return (window.SmartechTests && window.SmartechTests.activeCriteria()) || null;
 }
 function smartechTestSeconds() {
+    if (smartechIsDemo()) return 300;        // demo = 5 minutes
     const t = smartechActiveTest();
     return Math.round((t ? t.minutes : 10) * 60);
 }
@@ -213,6 +221,7 @@ function restartTest() {
 // -------------------- New Exercise (routes by language) --------------------
 const EXERCISE_LIST_PAGES = { English: "engtutor.html", Punjabi: "pbitutor.html", Hindi: "hinditutor.html" };
 function goToExerciseList() {
+    if (smartechIsDemo()) { window.location.href = "demo.html"; return; }
     if (smartechActiveTest()) { window.location.href = "testexercises.html?id=" + encodeURIComponent(smartechActiveTest().id); return; }
     const lang = localStorage.getItem("selectedExerciseLanguage") || "English";
     window.location.href = EXERCISE_LIST_PAGES[lang] || EXERCISE_LIST_PAGES.English;
@@ -416,6 +425,9 @@ function refreshTest() {
 
 // -------------------- Submit & Results --------------------
 async function submitResults() {
+    // 5-minute Chunk Based Demo (started from demo.html): same engine, no pass / fail,
+    // no certificate and no leaderboard entry.
+    const isDemo = smartechIsDemo();
 	// ✅ Show results & hide typing UI
 $("results").style.display = "block";
 $("results-table").style.display = "table";
@@ -497,8 +509,8 @@ setTimeout(() => {
     if ($("results-table")) $("results-table").style.display = "table";
     if ($("results-title-row")) $("results-title-row").style.display = "table-row";
     if ($("results-notes")) $("results-notes").style.display = "block";
-    if ($("exam-note")) { $("exam-note").style.display = "block"; $("exam-note").innerHTML = smartechActiveTest() ? '<span class="red-asterisk">*</span>Once time is over the test cannot be resumed and the text typed cannot be edited afterwards.' : '<span class="red-asterisk">*</span>In the PSSSB exam, before time over Test Submisson not Allowed'; }
-    if ($("pass-note")) { $("pass-note").style.display = "block"; $("pass-note").innerHTML = smartechActiveTest() ? SmartechTests.noteHTML(smartechActiveTest()) : '<span class="red-asterisk">*</span>To pass the test, you must type at least 1500 characters with 92% accuracy.'; }
+    if ($("exam-note")) { $("exam-note").style.display = "block"; $("exam-note").innerHTML = isDemo ? '<span class="red-asterisk">*</span>Demo test: once time is over the test cannot be resumed and the text typed cannot be edited afterwards.' : smartechActiveTest() ? '<span class="red-asterisk">*</span>Once time is over the test cannot be resumed and the text typed cannot be edited afterwards.' : '<span class="red-asterisk">*</span>In the PSSSB exam, before time over Test Submisson not Allowed'; }
+    if ($("pass-note")) { $("pass-note").style.display = "block"; $("pass-note").innerHTML = isDemo ? '<span class="red-asterisk">*</span>This was a 5-minute chunk based demo test. It is not a pass / fail exam result, no certificate is issued and it is not sent to the leaderboard.' : smartechActiveTest() ? SmartechTests.noteHTML(smartechActiveTest()) : '<span class="red-asterisk">*</span>To pass the test, you must type at least 1500 characters with 92% accuracy.'; }
     if ($("button-row")) $("button-row").style.display = "table-row";
     if ($("error-section")) $("error-section").style.display = "block";
     if ($("error-highlight")) { $("error-highlight").style.display = "block"; $("error-highlight").innerHTML = errorTablesHTML; }
@@ -596,9 +608,9 @@ setTimeout(() => {
     // PSSSB pass rule: minimum Gross Speed of 30 WPM AND at least 92% accuracy.
     // (a test type chosen in the Test Centre brings its own minutes / speed / accuracy / basis)
     const _tc = smartechActiveTest();
-    const result = _tc
+    const result = isDemo ? "Demo" : (_tc
         ? (SmartechTests.evaluate(_tc, grossCharacters, netCharacters, accuracyPercentage).passed ? "Pass" : "Fail")
-        : ((grossSpeed >= 30 && accuracyPercentage >= 92) ? "Pass" : "Fail");
+        : ((grossSpeed >= 30 && accuracyPercentage >= 92) ? "Pass" : "Fail"));
 
     // Update UI values
     if ($("gross-characters-value")) $("gross-characters-value").textContent = `${grossCharacters} (Words = ${wordCount})`;
@@ -609,7 +621,7 @@ setTimeout(() => {
     if ($("space-errors-value")) $("space-errors-value").textContent = `${spaceErrorsCount}`;
     if ($("error-characters-value")) $("error-characters-value").textContent = `${errorCharacters}`;
     if ($("net-characters-value")) $("net-characters-value").textContent = `${netCharacters}`;
-    if ($("gross-speed-value")) $("gross-speed-value").textContent = _tc ? `${grossSpeed} WPM (${_tc.name} ${totalMinutes} Min Rule)` : `${grossSpeed} WPM (According to PSSSB 10 Min Rule)`;
+    if ($("gross-speed-value")) $("gross-speed-value").textContent = isDemo ? `${grossSpeed} WPM (${totalMinutes} Min Demo)` : (_tc ? `${grossSpeed} WPM (${_tc.name} ${totalMinutes} Min Rule)` : `${grossSpeed} WPM (According to PSSSB 10 Min Rule)`);
     if ($("actual-gross-speed-value")) $("actual-gross-speed-value").textContent = `${actualGrossSpeed} WPM`;
     if ($("exercise-no-value")) $("exercise-no-value").textContent = smartechExerciseLabel();
     if ($("time-spent-value")) $("time-spent-value").textContent = `${minutesSpent} min ${secondsSpent.toString().padStart(2, "0")} sec`;
@@ -627,6 +639,7 @@ setTimeout(() => {
         result: result,
         testId: _tc ? _tc.id : "",
         testName: _tc ? _tc.name : "",
+        isDemo: isDemo,
         timestamp: new Date().toISOString(),
         language: localStorage.getItem("selectedExerciseLanguage") || "English",
         exerciseNo: Number(localStorage.getItem("selectedExerciseNo")) || null,
@@ -930,13 +943,13 @@ function displaySavedStats() {
         const formatted = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
         tableHTML += `<tr>
             <td>${formatted}</td>
-            <td>${stat.exerciseNo ? "Ex. " + stat.exerciseNo : "-"}</td>
+            <td>${stat.isDemo ? "Demo" : (stat.exerciseNo ? "Ex. " + stat.exerciseNo : "-")}</td>
             <td>${stat.engine === "words" ? stat.typedWords + " words" : stat.grossCharacters}</td>
             <td>${stat.accuracy}%</td>
             <td>${stat.grossSpeed} WPM</td>
             <td>${stat.actualSpeed} WPM</td>
             <td>${stat.timeSpent}</td>
-            <td class="${stat.result === 'Pass' ? 'pass-result' : 'fail-result'}">${stat.result}</td>
+            <td class="${stat.result === 'Pass' ? 'pass-result' : (stat.isDemo ? 'demo-result' : 'fail-result')}">${stat.result}</td>
         </tr>`;
     });
 
@@ -960,6 +973,7 @@ function displaySavedStats() {
 
 /* Exercise label shown in results: "Exercise 3 - English Lesson 3" (or "-" if unknown). */
 function smartechExerciseLabel() {
+    if (smartechIsDemo()) return "Chunk Based Demo (5 min)";
     const no = localStorage.getItem("selectedExerciseNo");
     const title = localStorage.getItem("selectedExerciseTitle");
     if (!no) return "-";

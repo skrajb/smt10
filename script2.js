@@ -459,6 +459,23 @@ setTimeout(() => {
     window.state.typedWords = finalTypedText.split(/\s+/).filter(word => word.length > 0);
     const allDefaultWords = window.paragraphs.slice(0, validChunks.length).join(" ").split(" ");
 
+    // Words Based Demo (demo.html, "Words Based Demo" card): the same word counting as the PHHC / PAU
+    // tests (net words = typed words - mistakes, speed = net words / minutes), but a demo has no pass mark,
+    // issues no certificate and is not sent to the leaderboard.
+    if (isDemo && localStorage.getItem("selectedDemoKind") === "words" && window.SmartechWordEngine) {
+        SmartechWordEngine.submitTest({
+            demo: true,
+            test: { id: "", name: "Words Based Demo", engine: "words", minutes: window.state.totalTime / 60, basis: "net", accuracy: 0, spaceMistakes: false, caseSensitive: false },
+            pairs: validChunks.map((typed, i) => ({ ref: window.paragraphs[i] || "", typed: typed })),
+            totalSeconds: window.state.totalTime,
+            startTime: window.state.startTime,
+            backspaces: window.state.backspaceCount,
+            exerciseLabel: smartechExerciseLabel(),
+            saveStats: saveTestStats
+        });
+        return;
+    }
+
     // PHHC-style tests ("engine: words"): judged on the WORDS typed, not on 5 characters = 1 word.
     // wordengine.js does the counting, fills the word rows of the Results table and saves the result.
     if (_tc && window.SmartechTests && SmartechTests.usesWordEngine(_tc) && window.SmartechWordEngine) {
@@ -990,7 +1007,7 @@ function displaySavedStats() {
 
 /* Exercise label shown in results: "Exercise 3 - English Lesson 3" (or "-" if unknown). */
 function smartechExerciseLabel() {
-    if (localStorage.getItem("selectedExerciseMode") === "demo") return "Demo (5 min)";
+    if (localStorage.getItem("selectedExerciseMode") === "demo") return localStorage.getItem("selectedDemoKind") === "words" ? "Words Based Demo (5 min)" : "Demo (5 min)";
     const no = localStorage.getItem("selectedExerciseNo");
     const title = localStorage.getItem("selectedExerciseTitle");
     if (!no) return "-";

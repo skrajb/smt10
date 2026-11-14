@@ -230,6 +230,17 @@ body {
   </div>
 </div>
 
+<script>
+/* Demo mode (Chunk Based Demo, opened from demo.html): a fixed 5-minute test. script.js reads the
+   same flag; this only shows 5:00 straight away instead of the 10:00 of a normal chunk test. */
+(function () {
+  var demo = false;
+  try { demo = localStorage.getItem("selectedExerciseMode") === "demo"; } catch (e) {}
+  var t = document.getElementById("timer");
+  if (demo && t) t.textContent = "Time: 5:00";
+})();
+</script>
+
 <script src="sheet-sync.js"></script>
 <script src="db.js"></script>
 <script src="wordengine.js"></script>

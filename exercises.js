@@ -38,7 +38,8 @@
        ### English Chunk Special 1     -> button "3. English Special 1"
        ### Punjabi August              -> button "5. Punjabi August"
 
-   DEMO exercises (5-minute demo test, shown before English everywhere):
+   DEMO exercises (5-minute demo tests; the Demo page has TWO cards:
+   "Chunk Based Demo" and "Words Based Demo" (Long Paragraph)):
 
        ### Demo English
        ---
@@ -51,6 +52,12 @@
    (English / Punjabi / Hindi) is optional: if it is left out, the
    language is detected from the text itself. Extra words become the
    button label ("### Demo English Banking" -> "Demo Banking").
+   A plain "### Demo English" is used by BOTH demo cards. To give one
+   card its own text add Chunk or Words (Paragraph / Long also work):
+
+       ### Demo Chunk English       -> Chunk Based Demo only
+       ### Demo Words English       -> Words Based Demo only
+
    Demo exercises appear ONLY on the Demo page, never in the Chunk or
    Long Paragraph lists.
 
@@ -170,6 +177,13 @@
 
     var hasChunk = /\bchunk\b/i.test(header);
     var hasPara = /\b(paragraph|long)\b/i.test(header);
+    // Demo only: which demo card uses it. "Chunk" = Chunk Based Demo, "Words" /
+    // "Paragraph" / "Long" = Words Based Demo, neither (or both) = both cards.
+    var hasWords = /\bwords?\b/i.test(header);
+    var demoKind = !isDemo ? ""
+                 : hasChunk && !(hasPara || hasWords) ? "chunk"
+                 : (hasPara || hasWords) && !hasChunk ? "words"
+                 : "both";
     var mode = isDemo ? "demo"
              : tags.length ? "test"
              : hasChunk && !hasPara ? "chunk"
@@ -186,14 +200,14 @@
     if (isDemo) {
       // "Demo English" -> "Demo";  "Demo English Banking" -> "Demo Banking"
       var extra = cleaned
-        .replace(/\b(demo|english|punjabi|hindi)\b/ig, " ")
+        .replace(/\b(demo|english|punjabi|hindi|words?)\b/ig, " ")
         .replace(/\s+/g, " ")
         .replace(/^[\s|:\-\u2013]+|[\s|:\-\u2013]+$/g, "");
       title = extra ? "Demo " + extra : "Demo";
     } else {
       title = cleaned || lang;
     }
-    return { lang: lang, mode: mode, title: title, tests: isDemo ? [] : tags };
+    return { lang: lang, mode: mode, title: title, tests: isDemo ? [] : tags, demoKind: demoKind };
   }
 
   /* ---------- TEST definitions ("### TEST ID" blocks) ---------- */
@@ -305,10 +319,14 @@
         .filter(Boolean);
       if (!segs.length) return;
 
-      out.push({ lang: info.lang || detectLang(segs[0]), mode: info.mode, title: info.title, text: segs[0], tests: info.tests });
+      var first = { lang: info.lang || detectLang(segs[0]), mode: info.mode, title: info.title, text: segs[0], tests: info.tests };
+      if (info.demoKind) first.demoKind = info.demoKind;
+      out.push(first);
       // Older files could pack extra "title --- text" pairs into one block.
       for (var j = 1; j + 1 < segs.length; j += 2) {
-        out.push({ lang: info.lang || detectLang(segs[j + 1]), mode: info.mode, title: segs[j], text: segs[j + 1], tests: info.tests });
+        var more = { lang: info.lang || detectLang(segs[j + 1]), mode: info.mode, title: segs[j], text: segs[j + 1], tests: info.tests };
+        if (info.demoKind) more.demoKind = info.demoKind;
+        out.push(more);
       }
     });
     return { items: out, tests: tests };
@@ -492,33 +510,51 @@
     refresh().then(function () { loading = false; render(); });
   }
 
-  /* ---------- Demo exercises (5-minute demo test) ---------- */
+  /* ---------- Demo exercises (5-minute demo tests) ---------- */
   var DEMO_LANGS = ["English", "Punjabi", "Hindi"];
 
-  // All demo exercises for one language (or every language when lang is omitted)
-  function demos(lang) {
+  // The Demo page has two cards:
+  //   chunk - "Chunk Based Demo"  -> testpage.html  (10 chunks, characters / 5 = words)
+  //   words - "Words Based Demo"  -> paragraph.html (one long passage, scored on typed words)
+  var DEMO_KINDS = {
+    chunk: { page: "testpage.html" },
+    words: { page: "paragraph.html" }
+  };
+
+  // All demo exercises for one language (or every language when lang is omitted).
+  // kind ("chunk" | "words") keeps only the demos meant for that card: a demo written
+  // as a plain "### Demo English" (no Chunk / Words in the header) serves both cards.
+  function demos(lang, kind) {
     return remoteItems().concat(readArray(KEY.custom)).filter(function (ex) {
-      return ex && ex.text && ex.mode === "demo" && (!lang || ex.lang === lang);
+      if (!ex || !ex.text || ex.mode !== "demo") return false;
+      if (lang && ex.lang !== lang) return false;
+      if (kind && ex.demoKind && ex.demoKind !== "both" && ex.demoKind !== kind) return false;
+      return true;
     });
   }
 
-  // Render the demo buttons of ONE language into a container (opens paragraph.html,
-  // which runs the 5-minute timer when selectedExerciseMode is "demo").
-  // opts: container (id or element), lang, target (default paragraph.html)
+  // Render the demo buttons of ONE language (and one demo kind) into a container.
+  // The click stores the passage and opens the test page, which runs the 5-minute
+  // timer because selectedExerciseMode is "demo"; selectedDemoKind tells the page
+  // which demo it is (script.js = chunk, script2.js + wordengine.js = words).
+  // opts: container (id or element), lang, kind ("chunk" | "words"),
+  //       label (button text, default "Demo"), target (page to open, default by kind)
   function mountDemo(opts) {
     var el = typeof opts.container === "string"
       ? document.getElementById(opts.container) : opts.container;
     if (!el) return;
+    var kind = opts.kind === "chunk" ? "chunk" : (opts.kind === "words" ? "words" : "");
+    var baseLabel = opts.label || "Demo";
     var loading = true;
 
     function render() {
-      var items = demos(opts.lang);
+      var items = demos(opts.lang, kind);
       el.innerHTML = "";
       if (!items.length) {
         var p = document.createElement("p");
         p.className = "demo-empty";
         p.textContent = loading
-          ? "Loading demo\u2026"
+          ? "Loading demo…"
           : (global.navigator && global.navigator.onLine === false
               ? "You are offline. Connect to the internet once so the demo can download."
               : "No demo available yet.");
@@ -529,7 +565,7 @@
         var b = document.createElement("button");
         b.type = "button";
         b.className = "exercise-btn demo-btn";
-        b.textContent = items.length > 1 && ex.title === "Demo" ? "Demo " + (i + 1) : ex.title;
+        b.textContent = ex.title === "Demo" ? (items.length > 1 ? baseLabel + " " + (i + 1) : baseLabel) : ex.title;
         b.addEventListener("click", function () {
           localStorage.removeItem(KEY.active);
           localStorage.setItem("selectedExerciseText", ex.text);
@@ -537,7 +573,9 @@
           localStorage.removeItem("selectedExerciseNo");
           localStorage.setItem("selectedExerciseTitle", ex.title || "Demo");
           localStorage.setItem("selectedExerciseMode", "demo");
-          window.location.href = opts.target || "paragraph.html";
+          if (kind) localStorage.setItem("selectedDemoKind", kind);
+          else localStorage.removeItem("selectedDemoKind");
+          window.location.href = opts.target || (kind ? DEMO_KINDS[kind].page : "paragraph.html");
         });
         el.appendChild(b);
       });
@@ -553,6 +591,7 @@
     demos: demos,
     mountDemo: mountDemo,
     DEMO_LANGS: DEMO_LANGS,
+    DEMO_KINDS: DEMO_KINDS,
     DEFAULT_URL: DEFAULT_URL,
     parse: parse,
     parseAll: parseAll,

@@ -18,7 +18,7 @@
    Activation, Contact) are left alone.
    ------------------------------------------------------------ */
 const SMARTECH_PAGES = {
-  "demo.html":           { eyebrow: "Demo",    title: "5-Minute Demo Test",    sub: "Try a real typing test in English, Punjabi or Hindi. Pick your language and type for 5 minutes." },
+  "demo.html":           { eyebrow: "Demo",    title: "5-Minute Demo Test",    sub: "Try a real typing test in English, Punjabi or Hindi. Choose Chunk Based or Words Based, pick your language and type for 5 minutes." },
   "testexercises.html":  { eyebrow: "Tests",   title: "Test Exercises",        sub: "Choose the exercise you want to practise for this test.", back: ["tests.html", "Test Centre"] },
   "manage.html":         { eyebrow: "Admin",   title: "Manage & Print",        sub: "See every test type and exercise from your GitHub file, and print them on A4 with the Smartech Education header." },
   "tests.html":          { eyebrow: "Tests",   title: "Test Centre",           sub: "Choose an exam-style test. Each test has its own time, pass rule and access code." },
@@ -41,6 +41,14 @@ function smartechIsDemoMode() {
   try { return localStorage.getItem("selectedExerciseMode") === "demo"; } catch (e) { return false; }
 }
 
+/* Which demo is running: "chunk" (testpage.html) or "words" (paragraph.html, word engine) */
+function smartechDemoKind(page) {
+  let k = "";
+  try { k = localStorage.getItem("selectedDemoKind") || ""; } catch (e) {}
+  if (k === "chunk" || k === "words") return k;
+  return page === "testpage.html" ? "chunk" : "";   // older demo links to paragraph.html have no kind
+}
+
 /* The test type (from tests.html) being taken on testpage.html / paragraph.html, if any */
 function smartechActiveTestInfo() {
   try {
@@ -59,15 +67,25 @@ function smartechRenderPageHeader() {
   let title = meta.title;
   let sub = meta.sub;
   let back = meta.back;
-  const demoMode = page === "paragraph.html" && smartechIsDemoMode();
+  const demoMode = (page === "paragraph.html" || page === "testpage.html") && smartechIsDemoMode();
   const testInfo = meta.dynamicLang && !demoMode ? smartechActiveTestInfo() : null;
   if (meta.dynamicLang) {
     let lang = "";
     try { lang = localStorage.getItem("selectedExerciseLanguage") || ""; } catch (e) {}
     if (/^(English|Punjabi|Hindi)$/.test(lang)) title = lang + " " + title;
     if (demoMode) {
-      title = (/^(English|Punjabi|Hindi)$/.test(lang) ? lang + " " : "") + "Demo Test";
-      sub = "5-minute demo test. Type the passage exactly as shown. Your speed and accuracy appear when time is up.";
+      const kind = smartechDemoKind(page);
+      const langPrefix = /^(English|Punjabi|Hindi)$/.test(lang) ? lang + " " : "";
+      if (kind === "chunk") {
+        title = langPrefix + "Chunk Based Demo";
+        sub = "5-minute chunk based demo. Type each chunk exactly as shown, then press Enter for the next one. Your speed and accuracy appear when time is up.";
+      } else if (kind === "words") {
+        title = langPrefix + "Words Based Demo";
+        sub = "5-minute words based demo (long paragraph). Type the full passage exactly as shown. Your result is counted on words typed, and appears when time is up.";
+      } else {
+        title = langPrefix + "Demo Test";
+        sub = "5-minute demo test. Type the passage exactly as shown. Your speed and accuracy appear when time is up.";
+      }
       back = ["demo.html", "Demo"];
     } else if (testInfo) {
       title = String(testInfo.name).replace(/&/g, "&amp;").replace(/</g, "&lt;");
