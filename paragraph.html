@@ -338,8 +338,41 @@ body[data-test-mode="paper"] .test-shell #typing-input {
   if (!tc || !tc.minutes || !sel) return;
   var secs = Math.round(tc.minutes * 60);
   var mins = String(Math.round(tc.minutes * 10) / 10);
-  sel.innerHTML = '<option value="' + secs + '">' + mins + ' Minutes</option>';
-  sel.value = String(secs);
+
+  /* ---- SSC CHSL: student can choose 10 or 15 minutes (this page only) ----
+     Edit here to change it. SSC_MATCH = which tests get the choice (matched on the test ID / name).
+     SSC_TIMES: the 10-minute rule is the test's own rule from the GitHub file (e.g. 35 WPM);
+     the 15-minute rule below replaces it (here 2000 characters). Pass / fail, result note and
+     certificate use the rule of the chosen time. */
+  var SSC_MATCH = /chsl/i;
+  var SSC_TIMES = [10, 15];
+  var SSC_RULE = { 15: { chars: 2000 } };      // optional own rule per time: { chars: n } or { wpm: n }, plus accuracy: n
+  var isSSC = SSC_MATCH.test(String(tc.id || "") + " " + String(tc.name || ""));
+  if (isSSC) {
+    var base = { minutes: tc.minutes, wpm: tc.wpm || 0, chars: tc.chars || 0, accuracy: tc.accuracy };
+    var opts = SSC_TIMES.slice();
+    if (opts.indexOf(tc.minutes) === -1) opts.push(tc.minutes);
+    opts.sort(function (a, b) { return a - b; });
+    sel.innerHTML = opts.map(function (m) {
+      return '<option value="' + Math.round(m * 60) + '">' + (Math.round(m * 10) / 10) + ' Minutes</option>';
+    }).join("");
+    sel.value = String(secs);
+    sel.addEventListener("change", function () {
+      var m = Math.round((parseInt(sel.value, 10) || secs) / 6) / 10;
+      var r = SSC_RULE[m], c = {};
+      for (var k in tc) c[k] = tc[k];
+      c.minutes = m;
+      c.wpm = base.wpm; c.chars = base.chars; c.accuracy = base.accuracy;
+      if (r && r.wpm) { c.wpm = r.wpm; c.chars = 0; }
+      else if (r && r.chars) { c.chars = r.chars; c.wpm = 0; }
+      else if (base.chars) { c.chars = Math.round(base.chars / base.minutes * m); }
+      if (r && r.accuracy) c.accuracy = r.accuracy;
+      try { localStorage.setItem("smartechActiveTest", JSON.stringify(c)); } catch (e) {}
+    });
+  } else {
+    sel.innerHTML = '<option value="' + secs + '">' + mins + ' Minutes</option>';
+    sel.value = String(secs);
+  }
   var t = document.getElementById("timer");
   if (t) t.textContent = "Time: " + Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
 })();
