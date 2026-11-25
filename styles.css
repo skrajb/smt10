@@ -284,7 +284,7 @@ button:active { transform: translateY(0); }
   background: #fff;
   line-height: 1.85;
   font-size: 1.3rem;
-  font-family: var(--font-body);
+  font-family: arial;
   overflow-y: auto;
   resize: none;
   outline: none;
