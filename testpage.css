@@ -103,7 +103,7 @@ main.container.test-shell {
   font-size: var(--tt-size); line-height: var(--tt-lh); box-shadow: var(--shadow-sm);
 }
 .test-shell .reference-outer { border-left: 4px solid var(--gold); }
-.test-shell #typing-input, .test-shell #paragraph, .test-shell .reference-outer, .test-shell .reference-outer * { font-family: Arial !important; }
+.test-shell #typing-input, .test-shell #paragraph, .test-shell .reference-outer, .test-shell .reference-outer * { font-family:Arial; }
 .test-shell .typing-input { caret-color: var(--accent); transition: border-color .2s, box-shadow .2s; }
 .test-shell .typing-input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(184, 134, 46, 0.22), var(--shadow-sm); }
 .test-shell .typing-input:disabled { background: #f3f4f6; }
